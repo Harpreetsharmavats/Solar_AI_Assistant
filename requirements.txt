@@ -4,7 +4,6 @@ pandas
 numpy
 matplotlib
 requests
-streamlit
 ftfy
 regex
 tqdm
