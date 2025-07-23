@@ -65,9 +65,9 @@ async def generate_report(area: float = Form(...)):
 
     try:
         genai.configure(api_key=api_key)
-        print("Prompt:", prompt)
+        
         print("API Key Exists:", bool(api_key))
-        print("Gemini Response:", response)
+        
 
 
         model = genai.GenerativeModel("models/gemini-pro")
