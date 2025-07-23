@@ -3,14 +3,14 @@ def calculate_roi(data):
     panel_area = 1.6  # square meters per panel
     efficiency = 0.18  # 18%
     sunlight_hours_per_year = 1500
-    panel_cost_inr = 20750  # Cost of one panel in INR
-    savings_per_kwh_inr = 10  # Savings in INR per kWh
+    panel_cost_inr = 20750
+    savings_per_kwh_inr = 10
 
     num_panels = int(area / panel_area)
     annual_energy = num_panels * efficiency * sunlight_hours_per_year
     total_cost_inr = num_panels * panel_cost_inr
     annual_savings_inr = annual_energy * savings_per_kwh_inr
-    payback = total_cost_inr / annual_savings_inr
+    payback = total_cost_inr / annual_savings_inr if annual_savings_inr > 0 else 0
 
     return {
         "Number of Panels": num_panels,
