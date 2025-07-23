@@ -1,6 +1,6 @@
 ﻿fastapi
-uvicorn[standard]
-google-generativeai
+uvicorn
+google-generativeai>=0.3.2
 opencv-python-headless
 numpy
 Pillow
