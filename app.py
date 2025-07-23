@@ -16,8 +16,7 @@ from openai import OpenAI
 # Load environment variables (works locally)
 load_dotenv()
 
-# Load OpenAI API Key from environment (works on Railway too)
-client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+
 
 # Initialize FastAPI app
 app = FastAPI()
@@ -66,6 +65,11 @@ async def analyze_image(file: UploadFile = File(...)):
 
 @app.post("/generate-report/")
 async def generate_report(area: float = Form(...)):
+    api_key = os.getenv("OPENAI_API_KEY")
+    if not api_key:
+        raise HTTPException(status_code=500, detail="Missing OpenAI API Key")
+
+    client = OpenAI(api_key=api_key)
     try:
         prompt = (
             f"You are a solar advisor. Based on a rooftop area of {area} m², generate a report including:\n"
