@@ -1,22 +1,19 @@
-from fastapi import FastAPI, File, UploadFile, HTTPException
+from fastapi import FastAPI, File, UploadFile, HTTPException, Form
 from fastapi.middleware.cors import CORSMiddleware
 from PIL import Image
 from utils.image_analysis import analyze_rooftop
 from utils.roi_calculator import calculate_roi
-import openai
 import numpy as np
 import io
 import cv2
 import os
 from dotenv import load_dotenv
 import traceback
-from fastapi import Form
-from openai import OpenAI
 
-# Load environment variables (works locally)
+import google.generativeai as genai
+
+# Load environment variables
 load_dotenv()
-
-
 
 # Initialize FastAPI app
 app = FastAPI()
@@ -24,7 +21,7 @@ app = FastAPI()
 # Enable CORS
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # For production, restrict origins
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -41,14 +38,10 @@ async def analyze_image(file: UploadFile = File(...)):
         if not contents:
             raise ValueError("Uploaded file is empty.")
 
-        # Convert to PIL image
         image_pil = Image.open(io.BytesIO(contents)).convert("RGB")
-
-        # Convert PIL to OpenCV
         image_np = np.array(image_pil)
         image_cv2 = cv2.cvtColor(image_np, cv2.COLOR_RGB2BGR)
 
-        # Analyze rooftop
         rooftop_data = analyze_rooftop(image_cv2)
         roi_data = calculate_roi(rooftop_data)
 
@@ -63,14 +56,17 @@ async def analyze_image(file: UploadFile = File(...)):
         traceback.print_exc()
         raise HTTPException(status_code=500, detail=f"Server error: {str(e)}")
 
+
 @app.post("/generate-report/")
 async def generate_report(area: float = Form(...)):
-    api_key = os.getenv("OPENAI_API_KEY")
+    api_key = os.getenv("GEMINI_API_KEY")
     if not api_key:
-        raise HTTPException(status_code=500, detail="Missing OpenAI API Key")
+        raise HTTPException(status_code=500, detail="Missing Gemini API Key")
 
-    client = OpenAI(api_key=api_key)
     try:
+        genai.configure(api_key=api_key)
+
+        model = genai.GenerativeModel("gemini-pro")
         prompt = (
             f"You are a solar advisor. Based on a rooftop area of {area} m², generate a report including:\n"
             "- Estimated number of solar panels\n"
@@ -80,21 +76,10 @@ async def generate_report(area: float = Form(...)):
             "- Recommended panel type"
         )
 
-      
+        response = model.generate_content(prompt)
 
-        response = client.chat.completions.create(
-            model="gpt-3.5-turbo",
-            messages=[
-                {"role": "system", "content": "You are a solar advisor."},
-                {"role": "user", "content": prompt}
-            ],
-            max_tokens=500
-        )
-
-        return {"report": response.choices[0].message.content}
+        return {"report": response.text}
 
     except Exception as e:
-        import traceback
         traceback.print_exc()
         raise HTTPException(status_code=500, detail=f"Error generating report: {str(e)}")
-
