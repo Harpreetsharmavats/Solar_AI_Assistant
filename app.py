@@ -70,7 +70,7 @@ async def generate_report(area: float = Form(...)):
         
 
 
-        model = genai.GenerativeModel("models/gemini-pro")
+        model = genai.GenerativeModel("v1beta/models/gemini-2.0-flash")
         prompt = (
             f"You are a solar advisor. Based on a rooftop area of {area} m², generate a report including:\n"
             "- Estimated number of solar panels\n"
