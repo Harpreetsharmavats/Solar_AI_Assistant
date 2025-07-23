@@ -11,12 +11,13 @@ import os
 from dotenv import load_dotenv
 import traceback
 from fastapi import Form
+from openai import OpenAI
 
 # Load environment variables (works locally)
 load_dotenv()
 
 # Load OpenAI API Key from environment (works on Railway too)
-openai.api_key = os.getenv("OPENAI_API_KEY")
+client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
 # Initialize FastAPI app
 app = FastAPI()
@@ -75,8 +76,7 @@ async def generate_report(area: float = Form(...)):
             "- Recommended panel type"
         )
 
-        # ✅ Fix for OpenAI v1.x SDK
-        client = openai.OpenAI(api_key=openai.api_key)
+      
 
         response = client.chat.completions.create(
             model="gpt-3.5-turbo",
