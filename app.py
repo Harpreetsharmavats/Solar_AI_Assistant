@@ -11,12 +11,11 @@ import os
 from dotenv import load_dotenv
 import traceback
 
-# Load environment variables
+# Load environment variables (works locally)
 load_dotenv()
 
-# Use new OpenAI client from SDK v1+
-from openai import OpenAI
-client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+# Load OpenAI API Key from environment (works on Railway too)
+openai.api_key = os.getenv("OPENAI_API_KEY")
 
 # Initialize FastAPI app
 app = FastAPI()
@@ -24,7 +23,7 @@ app = FastAPI()
 # Enable CORS
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # Change this for production
+    allow_origins=["*"],  # For production, restrict origins
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -48,7 +47,7 @@ async def analyze_image(file: UploadFile = File(...)):
         image_np = np.array(image_pil)
         image_cv2 = cv2.cvtColor(image_np, cv2.COLOR_RGB2BGR)
 
-        # Analyze rooftop with OpenCV image
+        # Analyze rooftop
         rooftop_data = analyze_rooftop(image_cv2)
         roi_data = calculate_roi(rooftop_data)
 
@@ -74,6 +73,9 @@ async def generate_report(area: float):
             "- ROI duration\n"
             "- Recommended panel type"
         )
+
+        # ✅ Updated to new OpenAI SDK structure (v1.x+)
+        client = openai.OpenAI(api_key=openai.api_key)
 
         response = client.chat.completions.create(
             model="gpt-3.5-turbo",
