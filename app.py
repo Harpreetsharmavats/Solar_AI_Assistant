@@ -1,4 +1,4 @@
-from fastapi import FastAPI, File, UploadFile, HTTPException
+from fastapi import FastAPI, File, UploadFile, HTTPException, Form
 from fastapi.middleware.cors import CORSMiddleware
 from PIL import Image
 from utils.image_analysis import analyze_rooftop
@@ -10,19 +10,17 @@ import cv2
 import os
 from dotenv import load_dotenv
 import traceback
-import os
 
 # Load environment variables
 load_dotenv()
-
 openai.api_key = os.getenv("OPENAI_API_KEY")
-# Initialize FastAPI app
+
 app = FastAPI()
 
 # Enable CORS
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # Change this for production
+    allow_origins=["*"],  # Update in production
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -39,14 +37,10 @@ async def analyze_image(file: UploadFile = File(...)):
         if not contents:
             raise ValueError("Uploaded file is empty.")
 
-        # Convert to PIL image
         image_pil = Image.open(io.BytesIO(contents)).convert("RGB")
-
-        # Convert PIL to OpenCV
         image_np = np.array(image_pil)
         image_cv2 = cv2.cvtColor(image_np, cv2.COLOR_RGB2BGR)
 
-        # Analyze rooftop with OpenCV image
         rooftop_data = analyze_rooftop(image_cv2)
         roi_data = calculate_roi(rooftop_data)
 
@@ -62,7 +56,7 @@ async def analyze_image(file: UploadFile = File(...)):
         raise HTTPException(status_code=500, detail=f"Server error: {str(e)}")
 
 @app.post("/generate-report/")
-async def generate_report(area: float):
+async def generate_report(area: float = Form(...)):  # 👈 Accepting form data
     try:
         prompt = (
             f"You are a solar advisor. Based on a rooftop area of {area} m², generate a report including:\n"
