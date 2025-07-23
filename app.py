@@ -10,6 +10,7 @@ import cv2
 import os
 from dotenv import load_dotenv
 import traceback
+from fastapi import Form
 
 # Load environment variables (works locally)
 load_dotenv()
@@ -63,7 +64,7 @@ async def analyze_image(file: UploadFile = File(...)):
         raise HTTPException(status_code=500, detail=f"Server error: {str(e)}")
 
 @app.post("/generate-report/")
-async def generate_report(area: float):
+async def generate_report(area: float = Form(...)):
     try:
         prompt = (
             f"You are a solar advisor. Based on a rooftop area of {area} m², generate a report including:\n"
