@@ -65,8 +65,12 @@ async def generate_report(area: float = Form(...)):
 
     try:
         genai.configure(api_key=api_key)
+        print("Prompt:", prompt)
+        print("API Key Exists:", bool(api_key))
+        print("Gemini Response:", response)
 
-        model = genai.GenerativeModel("gemini-pro")
+
+        model = genai.GenerativeModel("models/gemini-pro")
         prompt = (
             f"You are a solar advisor. Based on a rooftop area of {area} m², generate a report including:\n"
             "- Estimated number of solar panels\n"
