@@ -1,3 +1,5 @@
+import numpy as np
+
 def analyze_rooftop(image: np.ndarray):
     height, width, _ = image.shape
     total_area = (height * width) / 10000  # simplistic conversion
